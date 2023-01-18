@@ -4,7 +4,7 @@ This is a repository for my assignemnts from the course _Formal Methods in Softw
 
 These assignments cover an introductory level of knowledge for the following:
 * [Alloy][1] specification language and analyzer
-* [Spin] [2] verification tool
+* [Spin][2]  verification tool
 * [NuSMV][3] model checker
 
 # Dependencies
