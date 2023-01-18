@@ -11,7 +11,7 @@ These assignments cover an introductory level of knowledge for the following:
 
 The languages and tools described above are needed for running the tests.
 
-* Alloy comes as a ``self-contained executable''.
+* Alloy comes as a "self-contained executable".
   The usual way of running Alloy would be to run the following in a terminal:
 
   ```
