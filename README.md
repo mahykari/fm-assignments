@@ -26,7 +26,7 @@ The languages and tools described above are needed for running the tests.
   ```
   sudo apt install spin
   ```
-* NuSMV binaries can be downloaded from [this page]. You can place these binaries
+* NuSMV binaries can be downloaded from [this page][5]. You can place these binaries
   in a directory included in your PATH.
 
 
@@ -43,3 +43,4 @@ You can then check the specified LTL properties using the executable from the pr
 [2]: https://spinroot.com/spin/whatispin.html
 [3]: https://nusmv.fbk.eu/
 [4]: https://spinroot.com/spin/Man/README.html
+[5]: https://nusmv.fbk.eu/NuSMV/download/getting-v2.html
