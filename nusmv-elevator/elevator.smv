@@ -1,0 +1,123 @@
+-- A button is either not pressed, or pressed
+-- until the elevator arrives at its floor.
+
+MODULE button(floor, cur_floor)
+    VAR
+        pressed: boolean;
+
+    ASSIGN
+        init(pressed) := TRUE union FALSE;
+        next(pressed) := 
+            case
+                (floor = cur_floor) & pressed: FALSE;
+                pressed: TRUE;
+                TRUE: TRUE union FALSE;
+            esac;
+
+-- For the elevator, in addition to variable "floor", we use
+-- "delta" to show the direction of travel; delta can be
+-- interpreted as follows:
+-- * delta = 0: the elevator is stopped
+-- * delta > 0: the elevator is moving up
+-- * delta < 0: the elevator is moving down
+-- The value of delta indicates the difference between
+-- start and stop floors.
+
+-- We have defined immediate variables of form "pending_<...>", which indicate
+-- if there is a button pressed anywhere. These variables are valuated in
+-- accordance to the current value of floor.
+
+MODULE elevator(pressed_1, pressed_2, pressed_3)
+    VAR
+        floor: 1..3;
+        delta: -2..2;
+    
+    DEFINE
+        pending_here := (floor = 1 & pressed_1) |
+                        (floor = 2 & pressed_2) |
+                        (floor = 3 & pressed_3);
+        
+        pending_up_1 := (floor = 1 & pressed_2) |
+                        (floor = 2 & pressed_3);
+        
+        pending_up_2 := (floor = 1 & pressed_3);
+        
+        pending_down_1 := (floor = 2 & pressed_1) |
+                          (floor = 3 & pressed_2);
+        
+        pending_down_2 := (floor = 3 & pressed_1);
+    
+    ASSIGN
+        init(floor) := 1;
+        next(floor) :=
+            case
+                delta > 0 & floor < 3: floor + 1;
+                delta < 0 & floor > 1: floor - 1;
+                TRUE: floor;
+            esac;
+        
+        init(delta) := 0;
+        next(delta) :=
+            case
+                delta > 0: delta - 1;
+                delta < 0: delta + 1;
+                pending_here: 0;
+                pending_up_1: 1;
+                pending_down_1: -1;
+                pending_up_2: 2;
+                pending_down_2: -2;
+                TRUE: 0;
+            esac;
+
+-- With the 3 "JUSTICE" rules described below, we can ensure that
+-- the elevator will arrive at each floor infinitely often.
+
+MODULE main
+    VAR
+        e: elevator(b_1.pressed, b_2.pressed, b_3.pressed);
+        b_1: button(1, e.floor);
+        b_2: button(2, e.floor);
+        b_3: button(3, e.floor);
+    
+    JUSTICE
+        e.floor = 1;
+    
+    JUSTICE
+        e.floor = 2;
+    
+    JUSTICE
+        e.floor = 3;
+    
+    -- SPEC 1.
+    LTLSPEC
+        G (!(b_1.pressed | b_2.pressed | b_3.pressed) ->
+            e.floor = next(e.floor));
+    
+    -- SPEC 2. The intersection of the following 3 specs will provide
+    --         a sufficient description for SPEC 2.
+    
+    -- SPEC 2.1.
+    LTLSPEC
+        G (e.delta != 0 -> e.delta * next(e.delta) >= 0);
+
+    -- SPEC 2.2.
+    SPEC AG (
+        e.delta = 2 -> (
+            AX (e.pending_up_1) &
+            AX (AX (e.pending_here))  
+        )
+    );
+
+    -- SPEC 2.3.
+    SPEC AG (
+        e.delta = -2 -> (
+            AX (e.pending_down_1) &
+            AX (AX (e.pending_here))  
+        )
+    );
+    
+    -- SPEC 3.
+    LTLSPEC
+        G F (e.floor = 1) &
+        G F (e.floor = 2) &
+        G F (e.floor = 3);
